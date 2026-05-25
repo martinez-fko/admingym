@@ -3,11 +3,27 @@
 
 namespace App\Filament\Resources\Auth;
 
-use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
+use Filament\Auth\Pages\Login as BaseLogin;
+use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('username')
+                    ->label('Usuario')
+                    ->required()
+                    ->autofocus(),
+
+                $this->getPasswordFormComponent(),
+                $this->getRememberFormComponent(),
+            ]);
+    }
+
     protected function getCredentialsFromFormData(array $data): array
     {
         return [
@@ -16,11 +32,10 @@ class Login extends BaseLogin
         ];
     }
 
-    protected function getEmailFormComponent(): TextInput
+    protected function throwFailureValidationException(): never
     {
-        return TextInput::make('username')
-            ->label('Usuario')
-            ->required()
-            ->autocomplete();
+        throw ValidationException::withMessages([
+            'data.username' => 'Las credenciales son incorrectas.',
+        ]);
     }
 }
